@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --background: #0a0a0f;
+  --surface: #111118;
+  --surface-2: rgba(17, 17, 24, 0.78);
+  --border: #1e1e2e;
+  --accent: #6ee7b7;
+  --accent-hover: #34d399;
+  --text-primary: #f0f0f5;
+  --text-secondary: #8888aa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(52, 211, 153, 0.18), transparent 30%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.14), transparent 28%),
+    linear-gradient(180deg, #090910 0%, #0a0a0f 42%, #09090d 100%);
+  color: var(--text-primary);
+  font-family: var(--font-body), sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(136, 136, 170, 0.24);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mesh-background {
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  opacity: 0.8;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(110, 231, 183, 0.18), transparent 24%),
+    radial-gradient(circle at 85% 22%, rgba(167, 139, 250, 0.16), transparent 22%),
+    radial-gradient(circle at 45% 78%, rgba(56, 189, 248, 0.14), transparent 26%),
+    radial-gradient(circle at 72% 72%, rgba(244, 114, 182, 0.1), transparent 22%);
+  filter: blur(40px);
+  animation: meshMove 20s ease-in-out infinite;
+}
+
+@keyframes meshMove {
+  0% { transform: translate3d(-3%, -1%, 0) scale(1); }
+  50% { transform: translate3d(3%, 2%, 0) scale(1.08); }
+  100% { transform: translate3d(-3%, -1%, 0) scale(1); }
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(17, 17, 24, 0.96), rgba(12, 12, 18, 0.92));
+  border: 1px solid rgba(30, 30, 46, 0.92);
+  backdrop-filter: blur(18px);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #f0f0f5 0%, #6ee7b7 65%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body blockquote {
+  margin: 0 0 0.75rem;
+}
+
+.markdown-body pre {
+  margin: 0.9rem 0;
+}
+
+.markdown-body code {
+  font-family: var(--font-code), monospace;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+  }
+}
+
