@@ -1,0 +1,49 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'server/**'
+      - '.github/workflows/backend-tests.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'server/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+      
+      - name: Install dependencies
+        run: cd server && npm ci
+      
+      - name: Run linter
+        run: cd server && npm run lint --if-present
+      
+      - name: Check syntax
+        run: cd server && npm run test --if-present
+
+  deploy-render:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Deploy to Render
+        run: |
+          curl https://api.render.com/deploy/srv-${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
