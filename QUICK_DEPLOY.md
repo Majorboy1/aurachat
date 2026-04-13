@@ -7,7 +7,7 @@
 3. Paste this URL in the search: `https://github.com/Majorboy1/aurachat`
 4. Click the result, then "Apply" 
 5. Fill in environment variables:
-   - `OPENAI_API_KEY` = `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`
+   - `OPENAI_API_KEY` = Your key from `server/.env` file (find it in your project)
    - `REDIS_URL` = See Step 2 below
    - `CLIENT_ORIGIN` = `https://aurachat.vercel.app`
 6. Click "Create Blueprint"
