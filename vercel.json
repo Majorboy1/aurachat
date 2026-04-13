@@ -1,8 +1,16 @@
 {
-  "buildCommand": "cd client && npm run build",
+  "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/.next",
   "framework": "nextjs",
+  "installCommand": "cd client && npm install",
+  "devCommand": "cd client && npm run dev",
   "env": {
-    "NEXT_PUBLIC_SOCKET_URL": "https://aurachat-server.onrender.com"
+    "NEXT_PUBLIC_SOCKET_URL": "@aurachat-server-url"
+  },
+  "envs": {
+    "NEXT_PUBLIC_SOCKET_URL": {
+      "description": "Backend server URL for Socket.IO connections",
+      "example": "https://aurachat-server.onrender.com"
+    }
   }
 }
