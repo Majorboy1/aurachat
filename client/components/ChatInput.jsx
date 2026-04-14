@@ -70,7 +70,7 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-[calc(100%+0.75rem)] left-0 z-20 w-72 rounded-3xl border border-border bg-surface p-2 shadow-2xl"
+            className="absolute bottom-[calc(100%+0.75rem)] left-0 z-20 max-h-48 w-full max-w-xs overflow-y-auto rounded-3xl border border-border bg-surface p-2 shadow-2xl sm:w-72"
           >
             {filteredUsers.map((user) => (
               <button

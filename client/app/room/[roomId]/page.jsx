@@ -68,7 +68,7 @@ export default function RoomPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen px-4 py-4 md:px-6">
+    <div className="min-h-screen px-3 py-3 sm:px-4 sm:py-4 md:px-6">
       <div className="mesh-background" />
       <div className="print-only p-8">
         <h1>AuraChat - {roomId}</h1>
@@ -86,19 +86,19 @@ export default function RoomPage({ params }) {
         <motion.header
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-panel flex flex-col gap-4 rounded-[32px] px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          className="glass-panel flex flex-col gap-3 rounded-[32px] px-4 py-3 sm:px-5 sm:py-4 md:gap-4 lg:flex-row lg:items-center lg:justify-between"
         >
-          <div>
-            <p className="text-sm uppercase tracking-[0.22em] text-accent/80">AuraChat room</p>
-            <h1 className="text-3xl font-bold text-text" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs uppercase tracking-[0.22em] text-accent/80 sm:text-sm">AuraChat room</p>
+            <h1 className="truncate text-xl font-bold text-text sm:text-2xl md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
               {roomId}
             </h1>
-            <p className="text-sm text-muted">
+            <p className="truncate text-xs text-muted sm:text-sm">
               {status === "connected" ? "Connected live" : status === "connecting" ? "Connecting..." : "Disconnected"}
               {typingUsers.length > 0 ? ` • ${typingUsers.join(", ")} typing` : ""}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <ModelSelector value={currentModel} onChange={changeModel} />
             <ShareRoomButton roomId={roomId} onCopied={showCopiedToast} />
           </div>
@@ -110,12 +110,12 @@ export default function RoomPage({ params }) {
           </div>
         ) : null}
 
-        <div className="grid flex-1 gap-4 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <div className="grid flex-1 gap-3 sm:gap-4 md:grid-cols-[minmax(240px,1fr)] lg:grid-cols-[260px_minmax(0,1fr)]">
           <motion.aside
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-panel flex flex-col gap-4 rounded-[32px] p-4"
+            className="glass-panel flex flex-col gap-3 rounded-[28px] p-3 sm:rounded-[32px] sm:p-4 sm:gap-4"
           >
             <PresenceSidebar users={users} currentUsername={username} mentionPulseUsers={mentionPulseUsers} />
             <PersonaSelector value={currentPersona} onChange={changePersona} />
@@ -131,7 +131,7 @@ export default function RoomPage({ params }) {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-panel flex min-h-[70vh] flex-col gap-4 rounded-[32px] p-4"
+            className="glass-panel flex min-h-[60vh] sm:min-h-[70vh] flex-col gap-3 sm:gap-4 rounded-[28px] p-3 sm:rounded-[32px] sm:p-4"
           >
             <ChatWindow
               messages={messages}

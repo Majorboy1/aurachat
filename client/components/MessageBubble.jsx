@@ -26,20 +26,20 @@ export function MessageBubble({ message, currentUsername, onToggleReaction }) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="group rounded-[28px] border border-border bg-white/[0.03] p-4"
+      className="group rounded-[24px] border border-border bg-white/[0.03] p-3 sm:rounded-[28px] sm:p-4"
     >
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3 sm:gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <span
-            className="inline-flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-semibold text-black"
+            className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl text-xs font-semibold text-black sm:h-9 sm:w-9 sm:text-sm"
             style={{ backgroundColor: message.color || "#6ee7b7" }}
           >
             {(message.username || "A")[0]?.toUpperCase()}
           </span>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-text">{message.username}</span>
-              {message.username === currentUsername && !isAi ? <span className="text-xs text-accent">You</span> : null}
+              <span className="truncate text-xs font-semibold text-text sm:text-sm">{message.username}</span>
+              {message.username === currentUsername && !isAi ? <span className="flex-shrink-0 text-xs text-accent">You</span> : null}
             </div>
             <span className="text-xs text-muted">{new Date(message.timestamp).toLocaleTimeString()}</span>
           </div>
