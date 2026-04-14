@@ -42,12 +42,12 @@ export function Lobby() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-14">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:px-6 sm:py-14">
       <div className="mesh-background" />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute left-6 top-6 text-2xl font-bold tracking-tight text-gradient"
+        className="absolute left-4 top-4 text-xl font-bold tracking-tight text-gradient sm:left-6 sm:top-6 sm:text-2xl"
         style={{ fontFamily: "var(--font-heading)" }}
       >
         AuraChat
@@ -57,17 +57,17 @@ export function Lobby() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass-panel relative z-10 w-full max-w-xl rounded-[32px] p-8 shadow-2xl shadow-black/30"
+        className="glass-panel relative z-10 w-full max-w-xl rounded-[24px] p-4 shadow-2xl shadow-black/30 sm:rounded-[32px] sm:p-8"
       >
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <p className="mb-3 text-sm uppercase tracking-[0.24em] text-accent/80">Realtime multiplayer AI rooms</p>
+          <p className="mb-2 text-xs uppercase tracking-[0.24em] text-accent/80 sm:mb-3 sm:text-sm">Realtime multiplayer AI rooms</p>
           <h1
-            className="mb-3 text-5xl font-bold leading-tight text-text"
+            className="mb-2 text-3xl font-bold leading-tight text-text sm:mb-3 sm:text-5xl"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Chat with AI, together.
           </h1>
-          <p className="mb-8 max-w-lg text-base text-muted">
+          <p className="mb-6 max-w-lg text-sm text-muted sm:mb-8 sm:text-base">
             Spin up a room, invite people with a link, and watch one shared AI conversation stream to everyone live.
           </p>
         </motion.div>

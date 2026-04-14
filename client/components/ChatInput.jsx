@@ -86,8 +86,8 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
         ) : null}
       </AnimatePresence>
 
-      <div className="rounded-[32px] border border-border bg-surface/85 p-3 shadow-[0_20px_80px_rgba(0,0,0,0.28)]">
-        <div className="flex gap-3">
+      <div className="rounded-[24px] border border-border bg-surface/85 p-2 shadow-[0_20px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-3">
+        <div className="flex gap-2 sm:gap-3">
           <textarea
             ref={textareaRef}
             rows={3}
@@ -101,12 +101,12 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
               }
             }}
             placeholder={disabled ? "AI is thinking..." : "Message the room. Use @ to mention someone."}
-            className="min-h-[96px] flex-1 resize-none rounded-[24px] border border-border bg-black/15 px-4 py-3 text-text outline-none transition focus:border-accent focus:shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_0_30px_rgba(110,231,183,0.22)]"
+            className="min-h-[80px] flex-1 resize-none rounded-[20px] border border-border bg-black/15 px-3 py-2 text-xs text-text outline-none transition focus:border-accent focus:shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_0_30px_rgba(110,231,183,0.22)] sm:min-h-[96px] sm:rounded-[24px] sm:px-4 sm:py-3 sm:text-sm"
           />
           <button
             onClick={submit}
             disabled={disabled}
-            className="flex h-auto min-w-[60px] items-center justify-center rounded-[24px] bg-accent px-4 text-xl text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-auto min-w-[48px] flex-shrink-0 items-center justify-center rounded-[20px] bg-accent px-3 text-lg text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[60px] sm:rounded-[24px] sm:px-4 sm:text-xl"
           >
             ↑
           </button>
