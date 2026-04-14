@@ -11,6 +11,7 @@ import { PresenceSidebar } from "../../../components/PresenceSidebar";
 import { ShareRoomButton } from "../../../components/ShareRoomButton";
 import { SummaryButton } from "../../../components/SummaryButton";
 import { Toast } from "../../../components/Toast";
+import { UserHeader } from "../../../components/UserHeader";
 import { useChat } from "../../../hooks/useChat";
 import { useSocket } from "../../../hooks/useSocket";
 
@@ -26,6 +27,7 @@ export default function RoomPage({ params }) {
   const { socket, status } = useSocket();
   const [username, setUsername] = useState("");
   const [roomDisplayName, setRoomDisplayName] = useState(roomId);
+  const [roomTopic, setRoomTopic] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
@@ -39,6 +41,12 @@ export default function RoomPage({ params }) {
     const displayName = window.localStorage.getItem("aurachat:room-display-name");
     if (displayName) {
       setRoomDisplayName(displayName);
+    }
+
+    // Get room topic if available
+    const topic = window.localStorage.getItem("aurachat:room-topic");
+    if (topic) {
+      setRoomTopic(topic);
     }
   }, []);
 
@@ -62,6 +70,7 @@ export default function RoomPage({ params }) {
     changeModel,
     summarizeRoom,
     setSummaryState,
+    leaveRoom,
   } = useChat({
     socket,
     roomId,
@@ -77,8 +86,12 @@ export default function RoomPage({ params }) {
   return (
     <div className="min-h-screen px-3 py-3 sm:px-4 sm:py-4 md:px-6">
       <div className="mesh-background" />
+      
+      {/* User Header with Logout */}
+      <UserHeader username={username} roomDisplayName={roomDisplayName} onLeaveRoom={leaveRoom} />
+
       <div className="print-only p-8">
-        <h1>AuraChat - {roomId}</h1>
+        <h1>AuraChat - {roomDisplayName}</h1>
         {messages.map((message) => (
           <div key={message.id} style={{ marginBottom: "1rem" }}>
             <strong>
@@ -90,31 +103,54 @@ export default function RoomPage({ params }) {
       </div>
 
       <div className="no-print relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-[1600px] flex-col gap-4">
+        {/* Header with Room Info */}
         <motion.header
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-panel flex flex-col gap-3 rounded-[32px] px-4 py-3 sm:px-5 sm:py-4 md:gap-4 lg:flex-row lg:items-center lg:justify-between"
+          className="glass-panel flex flex-col gap-3 rounded-[32px] px-4 py-3 sm:px-5 sm:py-4 md:gap-4"
         >
-          <div className="min-w-0 flex-1">
-            <p className="text-xs uppercase tracking-[0.22em] text-accent/80 sm:text-sm">AuraChat room</p>
-            <h1 className="truncate text-xl font-bold text-text sm:text-2xl md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
-              {roomDisplayName}
-            </h1>
-            <p className="truncate text-xs text-muted sm:text-sm">
-              {status === "connected" ? "Connected live" : status === "connecting" ? "Connecting..." : "Disconnected"}
-              {typingUsers.length > 0 ? ` • ${typingUsers.join(", ")} typing` : ""}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <ModelSelector value={currentModel} onChange={changeModel} />
-            <ShareRoomButton roomId={roomId} onCopied={showCopiedToast} />
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            {/* Room Info */}
+            <div className="min-w-0 flex-1">
+              <p className="text-xs uppercase tracking-[0.22em] text-accent/80 sm:text-sm">AuraChat Room</p>
+              <div className="flex flex-col gap-1 sm:gap-2">
+                <h1 
+                  className="text-2xl font-bold text-text sm:text-3xl md:text-4xl break-words" 
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {roomDisplayName}
+                </h1>
+                {roomTopic && (
+                  <div className="text-xs sm:text-sm">
+                    <span className="inline-block rounded-lg bg-accent/20 px-2.5 py-1 text-accent font-medium">
+                      {roomTopic}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted mt-2 sm:text-sm">
+                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${status === "connected" ? "bg-green-400" : status === "connecting" ? "bg-yellow-400" : "bg-red-400"}`}></span>
+                {status === "connected" ? "Connected live" : status === "connecting" ? "Connecting..." : "Disconnected"}
+                {typingUsers.length > 0 ? ` • ${typingUsers.join(", ")} typing...` : ""}
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <ModelSelector value={currentModel} onChange={changeModel} />
+              <ShareRoomButton roomId={roomId} onCopied={showCopiedToast} />
+            </div>
           </div>
         </motion.header>
 
         {connectionError ? (
-          <div className="rounded-3xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="rounded-3xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100"
+          >
             {connectionError}
-          </div>
+          </motion.div>
         ) : null}
 
         <div className="grid flex-1 gap-3 sm:gap-4 md:grid-cols-[minmax(240px,1fr)] lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -125,6 +161,7 @@ export default function RoomPage({ params }) {
             className="glass-panel flex flex-col gap-3 rounded-[28px] p-3 sm:rounded-[32px] sm:p-4 sm:gap-4"
           >
             <PresenceSidebar users={users} currentUsername={username} mentionPulseUsers={mentionPulseUsers} />
+            <div className="h-px bg-border/30" />
             <PersonaSelector value={currentPersona} onChange={changePersona} />
             <SummaryButton
               onSummarize={summarizeRoom}

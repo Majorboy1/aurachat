@@ -262,6 +262,10 @@ export function useChat({
     });
   };
 
+  const leaveRoom = () => {
+    socket.emit("leave-room", { roomId });
+  };
+
   return {
     users,
     messages,
@@ -280,6 +284,7 @@ export function useChat({
     changeModel,
     summarizeRoom,
     setSummaryState,
+    leaveRoom,
   };
 }
 
