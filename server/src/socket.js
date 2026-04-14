@@ -13,7 +13,7 @@ import {
 } from "./rooms.js";
 import { streamAIResponse, streamSummary } from "./openai.js";
 
-function createUserMessage({ username, color, content }) {
+function createUserMessage({ username, color, content, isAskingAI }) {
   return {
     id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     username,
@@ -22,6 +22,7 @@ function createUserMessage({ username, color, content }) {
     timestamp: new Date().toISOString(),
     role: "user",
     reactions: {},
+    isAskingAI: isAskingAI || false,
   };
 }
 
@@ -77,7 +78,7 @@ export function attachSocket(server, clientOrigin) {
       socket.to(roomId).emit("user-left", { username });
     });
 
-    socket.on("send-message", async ({ roomId, message, model, persona, username }) => {
+    socket.on("send-message", async ({ roomId, message, model, persona, username, isAskingAI }) => {
       if (!roomId || !message?.trim()) {
         return;
       }
@@ -87,6 +88,7 @@ export function attachSocket(server, clientOrigin) {
           username,
           color: socket.data.color || "#38bdf8",
           content: message.trim(),
+          isAskingAI: isAskingAI || false,
         });
 
         await appendMessageToRoom(roomId, messageObject);

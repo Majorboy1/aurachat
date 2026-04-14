@@ -216,13 +216,14 @@ export function useChat({
     };
   }, [color, roomId, socket, username]);
 
-  const sendMessage = (message) => {
+  const sendMessage = (message, options = {}) => {
     socket.emit("send-message", {
       roomId,
       message,
       model: currentModel,
       persona: currentPersona,
       username,
+      isAskingAI: options.isAskingAI || false,
     });
   };
 

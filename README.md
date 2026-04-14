@@ -11,13 +11,17 @@ Shared-room AI chat with real-time multiplayer streaming, reactions, personas, s
 - Live presence sidebar with animated join and leave states
 - Shared room-wide AI persona selector
 - Shared room-wide model selector
+- **Ask AI button** to tag messages and prioritize AI responses
 - Markdown rendering with syntax-highlighted code blocks
 - Runnable JavaScript code blocks inside sandboxed iframes
 - Message reactions synced to all users
 - `@mention` autocomplete with highlighted mentions and pulsing presence dots
 - Streaming room summaries in a modal
 - Chat export to Markdown or print-to-PDF
-- Lobby with random room generation and animated mesh background
+- **AI Hint Banner** with persistent tips on how to interact with the AI
+- Lobby with room topic templates (Employment, Planning, Brainstorming, Learning, etc.)
+- User login/logout sessions with persistent localStorage
+- Leave room functionality with proper cleanup
 - GitHub bootstrap script for initializing and pushing the repo
 
 ## Tech Stack
@@ -69,6 +73,26 @@ aurachat/
 ├── setup.sh
 └── README.md
 ```
+
+## How to Use
+
+### Getting Started
+1. Enter your name and select or create a room topic
+2. Share the room link with others
+3. Everyone can see the same room and chat history
+
+### Interacting with the AI
+- **💬 Chat Mode**: Type a regular message to chat with everyone in the room
+- **❓ Ask AI Mode**: Click the **[Ask AI]** button before sending to tag your message as a question. The AI will prioritize these tagged questions
+- **💡 Tip**: Check the AI Hint Banner at the top of the chat for reminders on how to interact
+
+### Other Features
+- **@mention**: Type `@` followed by a username to mention someone
+- **😊 Reactions**: Hover over any message and click an emoji to react
+- **📝 Export**: Export the entire chat to Markdown or print to PDF
+- **🎭 Personas**: Change the AI's personality (shared across the room)
+- **🤖 Model**: Switch between OpenAI models (shared across the room)
+- **📊 Summary**: Generate a summary of the entire chat conversation
 
 ## Local Setup
 

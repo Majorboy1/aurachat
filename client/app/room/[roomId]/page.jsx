@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import { AIHintBanner } from "../../../components/AIHintBanner";
 import { ChatInput } from "../../../components/ChatInput";
 import { ChatWindow } from "../../../components/ChatWindow";
 import { ExportChatButton } from "../../../components/ExportChatButton";
@@ -177,12 +178,18 @@ export default function RoomPage({ params }) {
             transition={{ delay: 0.2 }}
             className="glass-panel flex min-h-[60vh] sm:min-h-[70vh] flex-col gap-3 sm:gap-4 rounded-[28px] p-3 sm:rounded-[32px] sm:p-4"
           >
+            {/* AI Hint Banner */}
+            <AIHintBanner />
+
+            {/* Chat Messages */}
             <ChatWindow
               messages={messages}
               currentUsername={username}
               isAiStreaming={isAiStreaming}
               onToggleReaction={(messageId, emoji, hasReacted) => toggleReaction({ messageId, emoji, hasReacted })}
             />
+
+            {/* Chat Input */}
             <ChatInput
               users={users}
               onSend={sendMessage}

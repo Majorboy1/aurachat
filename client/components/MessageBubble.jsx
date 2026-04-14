@@ -20,6 +20,7 @@ function renderMentions(text) {
 
 export function MessageBubble({ message, currentUsername, onToggleReaction }) {
   const isAi = message.role === "assistant";
+  const isAskingAI = message.isAskingAI === true;
 
   return (
     <motion.div
@@ -36,10 +37,16 @@ export function MessageBubble({ message, currentUsername, onToggleReaction }) {
           >
             {(message.username || "A")[0]?.toUpperCase()}
           </span>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="truncate text-xs font-semibold text-text sm:text-sm">{message.username}</span>
               {message.username === currentUsername && !isAi ? <span className="flex-shrink-0 text-xs text-accent">You</span> : null}
+              {isAskingAI && !isAi && (
+                <span className="inline-flex items-center gap-1 flex-shrink-0 bg-accent/30 text-accent text-xs px-2 py-0.5 rounded-full font-medium border border-accent/50">
+                  <span>❓</span>
+                  <span>Asking AI</span>
+                </span>
+              )}
             </div>
             <span className="text-xs text-muted">{new Date(message.timestamp).toLocaleTimeString()}</span>
           </div>

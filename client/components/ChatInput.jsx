@@ -7,6 +7,7 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
   const [value, setValue] = useState("");
   const [mentionQuery, setMentionQuery] = useState("");
   const [showMentions, setShowMentions] = useState(false);
+  const [isAskingAI, setIsAskingAI] = useState(false);
   const typingTimeoutRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -55,9 +56,10 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
       return;
     }
 
-    onSend(trimmed);
+    onSend(trimmed, { isAskingAI });
     setValue("");
     setShowMentions(false);
+    setIsAskingAI(false);
     onTypingStop();
   };
 
@@ -87,29 +89,53 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
       </AnimatePresence>
 
       <div className="rounded-[24px] border border-border bg-surface/85 p-2 shadow-[0_20px_80px_rgba(0,0,0,0.28)] sm:rounded-[32px] sm:p-3">
-        <div className="flex gap-2 sm:gap-3">
-          <textarea
-            ref={textareaRef}
-            rows={3}
-            value={value}
-            disabled={disabled}
-            onChange={(event) => handleTyping(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                submit();
-              }
-            }}
-            placeholder={disabled ? "AI is thinking..." : "Message the room. Use @ to mention someone."}
-            className="min-h-[80px] flex-1 resize-none rounded-[20px] border border-border bg-black/15 px-3 py-2 text-xs text-text outline-none transition focus:border-accent focus:shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_0_30px_rgba(110,231,183,0.22)] sm:min-h-[96px] sm:rounded-[24px] sm:px-4 sm:py-3 sm:text-sm"
-          />
-          <button
-            onClick={submit}
-            disabled={disabled}
-            className="flex h-auto min-w-[48px] flex-shrink-0 items-center justify-center rounded-[20px] bg-accent px-3 text-lg text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[60px] sm:rounded-[24px] sm:px-4 sm:text-xl"
-          >
-            ↑
-          </button>
+        <div className="space-y-2 sm:space-y-2.5">
+          <div className="flex gap-2 sm:gap-3">
+            <textarea
+              ref={textareaRef}
+              rows={3}
+              value={value}
+              disabled={disabled}
+              onChange={(event) => handleTyping(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  submit();
+                }
+              }}
+              placeholder={disabled ? "🤖 AI is thinking..." : "💬 Message the room. Use @ to mention. Click [Ask AI] for AI response."}
+              className="min-h-[80px] w-full resize-none rounded-[20px] border border-border bg-black/15 px-3 py-2 text-xs text-text outline-none transition focus:border-accent focus:shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_0_30px_rgba(110,231,183,0.22)] sm:min-h-[96px] sm:rounded-[24px] sm:px-4 sm:py-3 sm:text-sm"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
+            <button
+              onClick={() => setIsAskingAI(!isAskingAI)}
+              disabled={disabled || !value.trim()}
+              className={`flex items-center gap-2 flex-shrink-0 rounded-lg sm:rounded-xl px-3 py-2 text-xs sm:text-sm font-medium transition ${
+                isAskingAI
+                  ? "bg-accent/30 border border-accent text-accent"
+                  : "bg-white/10 border border-white/20 text-text/70 hover:text-text hover:bg-white/15"
+              } disabled:cursor-not-allowed disabled:opacity-40`}
+              title="Click to ask the AI - it will prioritize your question"
+            >
+              <span>❓</span>
+              <span>Ask AI</span>
+              {isAskingAI && <span className="text-accent">✓</span>}
+            </button>
+
+            <div className="flex-1" />
+
+            <button
+              onClick={submit}
+              disabled={disabled || !value.trim()}
+              className="flex h-auto items-center justify-center rounded-lg sm:rounded-xl bg-accent px-3 py-2 text-lg text-black font-medium transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:px-5 sm:py-2.5 sm:text-xl"
+              title={isAskingAI ? "Send question to AI" : "Send message to room"}
+            >
+              {isAskingAI ? "❓" : "↑"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
