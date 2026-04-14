@@ -4,6 +4,7 @@ import express from "express";
 import http from "http";
 import { createRedisClients } from "./redis.js";
 import { attachSocket } from "./socket.js";
+import { getUsersInRoom } from "./rooms.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +21,17 @@ app.use(express.json());
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "AuraChat server" });
+});
+
+app.get("/api/rooms/:roomId", (req, res) => {
+  const { roomId } = req.params;
+  const users = getUsersInRoom(roomId);
+  res.json({ 
+    roomId, 
+    exists: users.length > 0, 
+    userCount: users.length,
+    users: users.map(u => u.username)
+  });
 });
 
 await createRedisClients();

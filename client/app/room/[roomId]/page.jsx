@@ -25,6 +25,7 @@ export default function RoomPage({ params }) {
   const roomId = decodeURIComponent(params.roomId);
   const { socket, status } = useSocket();
   const [username, setUsername] = useState("");
+  const [roomDisplayName, setRoomDisplayName] = useState(roomId);
   const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
@@ -33,6 +34,12 @@ export default function RoomPage({ params }) {
     const nextName = storedName || fallback;
     setUsername(nextName);
     window.localStorage.setItem("aurachat:name", nextName);
+    
+    // Get display name from localStorage
+    const displayName = window.localStorage.getItem("aurachat:room-display-name");
+    if (displayName) {
+      setRoomDisplayName(displayName);
+    }
   }, []);
 
   const color = useMemo(() => pickColor(username || "Guest"), [username]);
@@ -91,7 +98,7 @@ export default function RoomPage({ params }) {
           <div className="min-w-0 flex-1">
             <p className="text-xs uppercase tracking-[0.22em] text-accent/80 sm:text-sm">AuraChat room</p>
             <h1 className="truncate text-xl font-bold text-text sm:text-2xl md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
-              {roomId}
+              {roomDisplayName}
             </h1>
             <p className="truncate text-xs text-muted sm:text-sm">
               {status === "connected" ? "Connected live" : status === "connecting" ? "Connecting..." : "Disconnected"}

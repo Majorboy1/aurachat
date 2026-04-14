@@ -4,6 +4,7 @@ const ROOM_TTL_SECONDS = 60 * 60 * 24;
 const roomUsers = new Map();
 const roomMetaFallback = new Map();
 const roomHistoryFallback = new Map();
+const createdRooms = new Set(); // Track explicitly created rooms
 
 function roomMetaKey(roomId) {
   return `room:${roomId}:meta`;
@@ -158,5 +159,13 @@ export async function getOpenAIContext(roomId) {
     role: message.role === "assistant" ? "assistant" : "user",
     content: message.content,
   }));
+}
+
+export function markRoomAsCreated(roomId) {
+  createdRooms.add(roomId);
+}
+
+export function isRoomCreated(roomId) {
+  return createdRooms.has(roomId);
 }
 

@@ -9,6 +9,7 @@ import {
   removeUserFromRoom,
   setRoomMeta,
   updateMessageReactions,
+  markRoomAsCreated,
 } from "./rooms.js";
 import { streamAIResponse, streamSummary } from "./openai.js";
 
@@ -45,6 +46,13 @@ export function attachSocket(server, clientOrigin) {
       socket.join(roomId);
 
       const users = addUserToRoom(roomId, { username, color });
+      
+      // Mark room as created when first user joins
+      if (users.length === 1) {
+        markRoomAsCreated(roomId);
+        console.log(`🎮 Room created: ${roomId}`);
+      }
+      
       const history = await getRoomHistory(roomId);
       const meta = await getRoomMeta(roomId);
 

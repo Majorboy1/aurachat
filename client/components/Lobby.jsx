@@ -18,9 +18,10 @@ export function Lobby() {
   const [name, setName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const placeholderRoom = useMemo(() => `ideas-${nanoid(6)}`, []);
 
-  const handleJoin = (roomIdOverride) => {
+  const handleJoin = async (roomIdOverride) => {
     const trimmedName = name.trim();
     const trimmedRoom = (roomIdOverride || roomName).trim();
 
@@ -29,16 +30,45 @@ export function Lobby() {
       return;
     }
 
-    const finalRoomId = slugifyRoomName(trimmedRoom) || trimmedRoom;
+    setIsLoading(true);
+    setError("");
+    
+    // Store original room name and slugified version
+    const slugifiedRoomId = slugifyRoomName(trimmedRoom);
+    const finalRoomId = slugifiedRoomId || trimmedRoom;
+    
+    // Check if room exists (only for join, not for create)
+    if (!roomIdOverride) {
+      try {
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+        const response = await fetch(`${socketUrl}/api/rooms/${encodeURIComponent(finalRoomId)}`);
+        const data = await response.json();
+        
+        if (!data.exists) {
+          setError("Room does not exist. Please create a new room or enter a different room name.");
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn("Could not verify room existence:", err);
+        // Allow join even if verification fails
+      }
+    }
+    
     window.localStorage.setItem("aurachat:name", trimmedName);
     window.localStorage.setItem("aurachat:last-room", finalRoomId);
+    window.localStorage.setItem("aurachat:room-display-name", trimmedRoom);
+    
+    // Navigate to room
     router.push(`/room/${encodeURIComponent(finalRoomId)}`);
   };
 
   const createNewRoom = () => {
-    const generatedRoom = `room-${nanoid(8)}`;
-    setRoomName(generatedRoom);
-    handleJoin(generatedRoom);
+    const roomDisplayName = `Room ${new Date().getTime()}`;
+    const slugifiedName = slugifyRoomName(roomDisplayName);
+    setRoomName(slugifiedName);
+    window.localStorage.setItem("aurachat:room-display-name", roomDisplayName);
+    handleJoin(slugifiedName);
   };
 
   return (
@@ -103,15 +133,17 @@ export function Lobby() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={() => handleJoin()}
-              className="flex-1 rounded-2xl bg-accent px-5 py-3 font-medium text-black transition hover:bg-accent-hover"
+              disabled={isLoading}
+              className="flex-1 rounded-2xl bg-accent px-5 py-3 font-medium text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Join Room
+              {isLoading ? "Connecting..." : "Join Existing Room"}
             </button>
             <button
               onClick={createNewRoom}
-              className="rounded-2xl border border-border bg-white/5 px-5 py-3 font-medium text-text transition hover:border-accent/40 hover:bg-white/10"
+              disabled={isLoading}
+              className="rounded-2xl border border-border bg-white/5 px-5 py-3 font-medium text-text transition hover:border-accent/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Create new room
+              {isLoading ? "Starting..." : "Create & Join"}
             </button>
           </div>
         </motion.div>
