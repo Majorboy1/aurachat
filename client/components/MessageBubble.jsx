@@ -21,6 +21,13 @@ function renderMentions(text) {
 export function MessageBubble({ message, currentUsername, onToggleReaction }) {
   const isAi = message.role === "assistant";
   const isAskingAI = message.isAskingAI === true;
+  const isAiGenerated = isAi || message.isAiGenerated === true;
+  const fullTimestamp = new Date(message.timestamp).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
   return (
     <motion.div
@@ -40,35 +47,48 @@ export function MessageBubble({ message, currentUsername, onToggleReaction }) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="truncate text-xs font-semibold text-text sm:text-sm">{message.username}</span>
-              {message.username === currentUsername && !isAi ? <span className="flex-shrink-0 text-xs text-accent">You</span> : null}
-              {isAskingAI && !isAi && (
-                <span className="inline-flex items-center gap-1 flex-shrink-0 bg-accent/30 text-accent text-xs px-2 py-0.5 rounded-full font-medium border border-accent/50">
-                  <span>❓</span>
+              {message.username === currentUsername && !isAi ? (
+                <span className="flex-shrink-0 text-xs text-accent">You</span>
+              ) : null}
+              {isAiGenerated ? (
+                <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-sky-300/40 bg-sky-400/15 px-2 py-0.5 text-xs font-medium text-sky-100">
+                  <span>AI</span>
+                  <span>Reply</span>
+                </span>
+              ) : null}
+              {isAskingAI && !isAi ? (
+                <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-accent/50 bg-accent/30 px-2 py-0.5 text-xs font-medium text-accent">
+                  <span>AI</span>
                   <span>Asking AI</span>
                 </span>
-              )}
+              ) : null}
             </div>
-            <span className="text-xs text-muted">{new Date(message.timestamp).toLocaleTimeString()}</span>
+            <span className="text-xs text-muted" title={fullTimestamp}>
+              {fullTimestamp}
+            </span>
           </div>
         </div>
       </div>
 
       {isAi ? (
-        <div className="markdown-body text-sm leading-7 text-text">
-          <ReactMarkdown
-            components={{
-              code({ inline, className, children }) {
-                const match = /language-(\w+)/.exec(className || "");
-                const value = String(children).replace(/\n$/, "");
-                if (inline) {
-                  return <code className="rounded bg-white/10 px-1.5 py-0.5">{value}</code>;
-                }
-                return <CodeBlock language={match?.[1]} value={value} />;
-              },
-            }}
-          >
-            {message.content}
-          </ReactMarkdown>
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.18em] text-sky-200/80">AI-generated response</p>
+          <div className="markdown-body text-sm leading-7 text-text">
+            <ReactMarkdown
+              components={{
+                code({ inline, className, children }) {
+                  const match = /language-(\w+)/.exec(className || "");
+                  const value = String(children).replace(/\n$/, "");
+                  if (inline) {
+                    return <code className="rounded bg-white/10 px-1.5 py-0.5">{value}</code>;
+                  }
+                  return <CodeBlock language={match?.[1]} value={value} />;
+                },
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
         </div>
       ) : (
         <div className="whitespace-pre-wrap text-sm leading-7 text-text">{renderMentions(message.content || "")}</div>
@@ -82,4 +102,3 @@ export function MessageBubble({ message, currentUsername, onToggleReaction }) {
     </motion.div>
   );
 }
-

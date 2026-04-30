@@ -29,6 +29,7 @@ export function Lobby() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState("create");
   const placeholderRoom = useMemo(() => `ideas-${nanoid(6)}`, []);
 
   const handleJoin = async (roomIdOverride) => {
@@ -48,7 +49,7 @@ export function Lobby() {
     const finalRoomId = slugifiedRoomId || trimmedRoom;
     
     // Check if room exists (only for join, not for create)
-    if (!roomIdOverride) {
+    if (!roomIdOverride && mode === "join") {
       try {
         const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
         const response = await fetch(`${socketUrl}/api/rooms/${encodeURIComponent(finalRoomId)}`);
@@ -70,9 +71,10 @@ export function Lobby() {
     window.localStorage.setItem("aurachat:room-display-name", trimmedRoom);
     if (selectedTopic) {
       window.localStorage.setItem("aurachat:room-topic", selectedTopic);
+    } else {
+      window.localStorage.removeItem("aurachat:room-topic");
     }
-    
-    // Navigate to room
+
     router.push(`/room/${encodeURIComponent(finalRoomId)}`);
   };
 
@@ -80,6 +82,7 @@ export function Lobby() {
     const displayName = topicExample || `Room ${new Date().getTime()}`;
     const slugifiedName = slugifyRoomName(displayName);
     setRoomName(displayName);
+    setMode("create");
     window.localStorage.setItem("aurachat:room-display-name", displayName);
     handleJoin(slugifiedName);
   };
@@ -88,7 +91,7 @@ export function Lobby() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:px-6 sm:py-14">
       <div className="mesh-background" />
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
         className="absolute left-4 top-4 text-xl font-bold tracking-tight text-gradient sm:left-6 sm:top-6 sm:text-2xl"
         style={{ fontFamily: "var(--font-heading)" }}
@@ -97,12 +100,12 @@ export function Lobby() {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="glass-panel relative z-10 w-full max-w-2xl rounded-[24px] p-4 shadow-2xl shadow-black/30 sm:rounded-[32px] sm:p-8"
       >
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <p className="mb-2 text-xs uppercase tracking-[0.24em] text-accent/80 sm:mb-3 sm:text-sm">Realtime multiplayer AI rooms</p>
           <h1
             className="mb-2 text-3xl font-bold leading-tight text-text sm:mb-3 sm:text-5xl"
@@ -116,7 +119,7 @@ export function Lobby() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="space-y-6"
@@ -162,9 +165,44 @@ export function Lobby() {
           </div>
 
           {/* Manual Room Section */}
-          <div>
+          <div className="rounded-xl border border-border/30 bg-white/5 p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setMode("create");
+                  setError("");
+                }}
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+                  mode === "create"
+                    ? "bg-accent text-black"
+                    : "border border-border bg-black/10 text-text/75 hover:bg-white/10"
+                }`}
+              >
+                Create Room
+              </button>
+              <button
+                onClick={() => {
+                  setMode("join");
+                  setError("");
+                }}
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+                  mode === "join"
+                    ? "bg-accent text-black"
+                    : "border border-border bg-black/10 text-text/75 hover:bg-white/10"
+                }`}
+              >
+                Join Room
+              </button>
+            </div>
+            <p className="mb-3 text-sm text-muted">
+              {mode === "create"
+                ? "Create a fresh room link, share it, and start the conversation right away."
+                : "Enter an existing room name to rejoin a saved conversation and its history."}
+            </p>
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-text">Or, join/create a custom room</span>
+              <span className="mb-2 block text-sm font-medium text-text">
+                {mode === "create" ? "Room name" : "Existing room name"}
+              </span>
               <input
                 value={roomName}
                 onChange={(event) => setRoomName(event.target.value)}
@@ -176,7 +214,7 @@ export function Lobby() {
 
           {error ? (
             <motion.p 
-              initial={{ opacity: 0 }}
+              initial={false}
               animate={{ opacity: 1 }}
               className="text-sm text-rose-300"
             >
@@ -186,24 +224,27 @@ export function Lobby() {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
-              onClick={() => handleJoin()}
-              disabled={isLoading || !name.trim() || !roomName.trim()}
-              className="flex-1 rounded-2xl bg-accent px-5 py-3 font-medium text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? "Connecting..." : "Join Existing Room"}
-            </button>
-            <button
               onClick={() => {
                 if (!name.trim() || !roomName.trim()) {
                   setError("Please fill in your name and room name.");
                   return;
                 }
-                createNewRoom(roomName);
+                if (mode === "create") {
+                  createNewRoom(roomName);
+                  return;
+                }
+                handleJoin();
               }}
-              disabled={isLoading}
-              className="rounded-2xl border border-border bg-white/5 px-5 py-3 font-medium text-text transition hover:border-accent/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isLoading || !name.trim() || !roomName.trim()}
+              className="flex-1 rounded-2xl bg-accent px-5 py-3 font-medium text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? "Starting..." : "Create & Join"}
+              {isLoading
+                ? mode === "create"
+                  ? "Creating room..."
+                  : "Joining room..."
+                : mode === "create"
+                  ? "Create and Enter Room"
+                  : "Join Room"}
             </button>
           </div>
         </motion.div>
@@ -211,4 +252,3 @@ export function Lobby() {
     </div>
   );
 }
-

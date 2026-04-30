@@ -35,7 +35,12 @@ export function useChat({
   const [currentPersona, setCurrentPersona] = useState(initialPersona);
   const [summaryState, setSummaryState] = useState({ isOpen: false, isStreaming: false, content: "" });
   const [connectionError, setConnectionError] = useState("");
+  const [isRoomLoading, setIsRoomLoading] = useState(true);
   const [mentionPulseUsers, setMentionPulseUsers] = useState([]);
+  const [aiAvailability, setAiAvailability] = useState({
+    mode: "ready",
+    message: "Aura AI is available when someone uses Ask AI.",
+  });
   const streamingMessageRef = useRef(null);
   const usersRef = useRef(users);
 
@@ -50,6 +55,7 @@ export function useChat({
 
     const onConnectError = () => {
       setConnectionError("Unable to connect to AuraChat. Check the server and try again.");
+      setIsRoomLoading(false);
     };
 
     const onRoomJoined = ({ users: nextUsers, history, currentPersona: persona, currentModel: model }) => {
@@ -58,6 +64,7 @@ export function useChat({
       setCurrentPersona(persona || "Default");
       setCurrentModel(model || "gpt-4o");
       setConnectionError("");
+      setIsRoomLoading(false);
     };
 
     const onUserJoined = ({ username: joinedUsername, color: joinedColor }) => {
@@ -87,17 +94,22 @@ export function useChat({
 
     const onAiStart = () => {
       setIsAiStreaming(true);
+      setAiAvailability({
+        mode: "ready",
+        message: "Aura AI is preparing a reply for everyone in the room.",
+      });
       const tempId = `ai-streaming-${Date.now()}`;
       streamingMessageRef.current = tempId;
       setMessages((prev) =>
         upsertMessage(prev, {
           id: tempId,
-          username: "Aura",
+          username: "Aura AI",
           color: "#6ee7b7",
           content: "",
           timestamp: new Date().toISOString(),
           role: "assistant",
           reactions: {},
+          isAiGenerated: true,
         }),
       );
     };
@@ -122,10 +134,31 @@ export function useChat({
       setMessages((prev) =>
         prev.map((message) =>
           message.id === tempId
-            ? { ...message, id: messageId, content: fullContent, role: "assistant", reactions: {} }
+            ? {
+                ...message,
+                id: messageId,
+                content: fullContent,
+                role: "assistant",
+                reactions: {},
+                isAiGenerated: true,
+              }
             : message,
         ),
       );
+
+      if (!/fallback response/i.test(fullContent || "")) {
+        setAiAvailability({
+          mode: "ready",
+          message: "Aura AI is available when someone uses Ask AI.",
+        });
+      }
+    };
+
+    const onAiFallback = ({ reason }) => {
+      setAiAvailability({
+        mode: "fallback",
+        message: `AI unavailable -> using fallback. ${reason || "OpenAI is temporarily unavailable."}`,
+      });
     };
 
     const onReactionUpdated = ({ messageId, reactions }) => {
@@ -169,6 +202,7 @@ export function useChat({
     const onServerError = ({ message }) => {
       setConnectionError(message || "Something went wrong.");
       setIsAiStreaming(false);
+      setIsRoomLoading(false);
       setSummaryState((prev) => ({ ...prev, isStreaming: false }));
     };
 
@@ -180,6 +214,7 @@ export function useChat({
     socket.on("ai-stream-start", onAiStart);
     socket.on("ai-stream-token", onAiToken);
     socket.on("ai-stream-end", onAiEnd);
+    socket.on("ai-fallback", onAiFallback);
     socket.on("reaction-updated", onReactionUpdated);
     socket.on("user-typing", onUserTyping);
     socket.on("user-stop-typing", onUserStopTyping);
@@ -203,6 +238,7 @@ export function useChat({
       socket.off("ai-stream-start", onAiStart);
       socket.off("ai-stream-token", onAiToken);
       socket.off("ai-stream-end", onAiEnd);
+      socket.off("ai-fallback", onAiFallback);
       socket.off("reaction-updated", onReactionUpdated);
       socket.off("user-typing", onUserTyping);
       socket.off("user-stop-typing", onUserStopTyping);
@@ -276,7 +312,9 @@ export function useChat({
     currentPersona,
     summaryState,
     connectionError,
+    isRoomLoading,
     mentionPulseUsers,
+    aiAvailability,
     sendMessage,
     startTyping,
     stopTyping,
@@ -288,4 +326,3 @@ export function useChat({
     leaveRoom,
   };
 }
-

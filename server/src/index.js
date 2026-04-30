@@ -1,10 +1,19 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import cors from "cors";
 import express from "express";
 import http from "http";
+import path from "path";
+import { fileURLToPath } from "url";
 import { createRedisClients } from "./redis.js";
 import { attachSocket } from "./socket.js";
-import { getUsersInRoom } from "./rooms.js";
+import { doesRoomExist, getUsersInRoom } from "./rooms.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const serverRoot = path.resolve(__dirname, "..");
+
+dotenv.config({ path: path.join(serverRoot, ".env") });
+dotenv.config({ path: path.join(serverRoot, ".env.local"), override: true });
 
 const app = express();
 const server = http.createServer(app);
@@ -23,14 +32,14 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "AuraChat server" });
 });
 
-app.get("/api/rooms/:roomId", (req, res) => {
+app.get("/api/rooms/:roomId", async (req, res) => {
   const { roomId } = req.params;
   const users = getUsersInRoom(roomId);
-  res.json({ 
-    roomId, 
-    exists: users.length > 0, 
+  res.json({
+    roomId,
+    exists: await doesRoomExist(roomId),
     userCount: users.length,
-    users: users.map(u => u.username)
+    users: users.map((user) => user.username),
   });
 });
 

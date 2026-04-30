@@ -33,7 +33,7 @@ export function UserHeader({ username, roomDisplayName, onLeaveRoom }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       className="fixed right-3 top-3 z-50 sm:right-4 sm:top-4 flex gap-2 sm:gap-3 flex-wrap justify-end"
     >

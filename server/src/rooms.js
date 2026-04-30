@@ -4,7 +4,7 @@ const ROOM_TTL_SECONDS = 60 * 60 * 24;
 const roomUsers = new Map();
 const roomMetaFallback = new Map();
 const roomHistoryFallback = new Map();
-const createdRooms = new Set(); // Track explicitly created rooms
+const roomCreatedFallback = new Map();
 
 function roomMetaKey(roomId) {
   return `room:${roomId}:meta`;
@@ -12,6 +12,10 @@ function roomMetaKey(roomId) {
 
 function roomHistoryKey(roomId) {
   return `room:${roomId}:history`;
+}
+
+function roomCreatedKey(roomId) {
+  return `room:${roomId}:created`;
 }
 
 function defaultRoomMeta() {
@@ -107,6 +111,19 @@ export async function getRoomHistory(roomId) {
   return roomHistoryFallback.get(roomId) || [];
 }
 
+async function getRoomCreatedState(roomId) {
+  const redis = getRedis();
+  if (redis && isRedisAvailable()) {
+    try {
+      return (await redis.get(roomCreatedKey(roomId))) === "1";
+    } catch (error) {
+      console.error("Unable to load room created state from Redis:", error.message);
+    }
+  }
+
+  return roomCreatedFallback.get(roomId) === true;
+}
+
 export async function saveRoomHistory(roomId, history) {
   const redis = getRedis();
   if (redis && isRedisAvailable()) {
@@ -161,11 +178,36 @@ export async function getOpenAIContext(roomId) {
   }));
 }
 
-export function markRoomAsCreated(roomId) {
-  createdRooms.add(roomId);
+export async function markRoomAsCreated(roomId) {
+  const redis = getRedis();
+
+  if (redis && isRedisAvailable()) {
+    try {
+      await redis.set(roomCreatedKey(roomId), "1", "EX", ROOM_TTL_SECONDS);
+      return;
+    } catch (error) {
+      console.error("Unable to persist room created state:", error.message);
+    }
+  }
+
+  roomCreatedFallback.set(roomId, true);
 }
 
-export function isRoomCreated(roomId) {
-  return createdRooms.has(roomId);
+export async function doesRoomExist(roomId) {
+  if (getUsersInRoom(roomId).length > 0) {
+    return true;
+  }
+
+  if (await getRoomCreatedState(roomId)) {
+    return true;
+  }
+
+  return (await getRoomHistory(roomId)).length > 0;
 }
 
+export function resetRoomsState() {
+  roomUsers.clear();
+  roomMetaFallback.clear();
+  roomHistoryFallback.clear();
+  roomCreatedFallback.clear();
+}

@@ -62,7 +62,9 @@ export default function RoomPage({ params }) {
     currentPersona,
     summaryState,
     connectionError,
+    isRoomLoading,
     mentionPulseUsers,
+    aiAvailability,
     sendMessage,
     startTyping,
     stopTyping,
@@ -106,7 +108,7 @@ export default function RoomPage({ params }) {
       <div className="no-print relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-[1600px] flex-col gap-4">
         {/* Header with Room Info */}
         <motion.header
-          initial={{ opacity: 0, y: 18 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           className="glass-panel flex flex-col gap-3 rounded-[32px] px-4 py-3 sm:px-5 sm:py-4 md:gap-4"
         >
@@ -144,9 +146,19 @@ export default function RoomPage({ params }) {
           </div>
         </motion.header>
 
+        {isRoomLoading ? (
+          <motion.div
+            initial={false}
+            animate={{ opacity: 1 }}
+            className="rounded-3xl border border-border bg-white/5 px-4 py-3 text-sm text-text/80"
+          >
+            Joining room and loading conversation history...
+          </motion.div>
+        ) : null}
+
         {connectionError ? (
           <motion.div 
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             className="rounded-3xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100"
           >
@@ -156,7 +168,7 @@ export default function RoomPage({ params }) {
 
         <div className="grid flex-1 gap-3 sm:gap-4 md:grid-cols-[minmax(240px,1fr)] lg:grid-cols-[260px_minmax(0,1fr)]">
           <motion.aside
-            initial={{ opacity: 0, y: 18 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="glass-panel flex flex-col gap-3 rounded-[28px] p-3 sm:rounded-[32px] sm:p-4 sm:gap-4"
@@ -173,13 +185,13 @@ export default function RoomPage({ params }) {
           </motion.aside>
 
           <motion.section
-            initial={{ opacity: 0, y: 18 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="glass-panel flex min-h-[60vh] sm:min-h-[70vh] flex-col gap-3 sm:gap-4 rounded-[28px] p-3 sm:rounded-[32px] sm:p-4"
           >
             {/* AI Hint Banner */}
-            <AIHintBanner />
+            <AIHintBanner aiAvailability={aiAvailability} />
 
             {/* Chat Messages */}
             <ChatWindow
@@ -195,7 +207,7 @@ export default function RoomPage({ params }) {
               onSend={sendMessage}
               onTypingStart={startTyping}
               onTypingStop={stopTyping}
-              disabled={isAiStreaming}
+              disabled={isAiStreaming || isRoomLoading}
               currentUsername={username}
             />
           </motion.section>
@@ -206,4 +218,3 @@ export default function RoomPage({ params }) {
     </div>
   );
 }
-

@@ -103,26 +103,29 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
                   submit();
                 }
               }}
-              placeholder={disabled ? "🤖 AI is thinking..." : "💬 Message the room. Use @ to mention. Click [Ask AI] for AI response."}
+              placeholder={
+                disabled
+                  ? "AI is thinking..."
+                  : "Message the room. Use @ to mention someone, or click Ask AI for an AI reply."
+              }
               className="min-h-[80px] w-full resize-none rounded-[20px] border border-border bg-black/15 px-3 py-2 text-xs text-text outline-none transition focus:border-accent focus:shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_0_30px_rgba(110,231,183,0.22)] sm:min-h-[96px] sm:rounded-[24px] sm:px-4 sm:py-3 sm:text-sm"
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 sm:gap-3 flex-wrap">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={() => setIsAskingAI(!isAskingAI)}
               disabled={disabled || !value.trim()}
-              className={`flex items-center gap-2 flex-shrink-0 rounded-lg sm:rounded-xl px-3 py-2 text-xs sm:text-sm font-medium transition ${
+              className={`flex flex-shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition sm:rounded-xl sm:text-sm ${
                 isAskingAI
-                  ? "bg-accent/30 border border-accent text-accent"
-                  : "bg-white/10 border border-white/20 text-text/70 hover:text-text hover:bg-white/15"
+                  ? "border-accent bg-accent/30 text-accent"
+                  : "border-white/20 bg-white/10 text-text/70 hover:bg-white/15 hover:text-text"
               } disabled:cursor-not-allowed disabled:opacity-40`}
-              title="Click to ask the AI - it will prioritize your question"
+              title="Mark this message so the AI replies in the room"
             >
-              <span>❓</span>
+              <span>AI</span>
               <span>Ask AI</span>
-              {isAskingAI && <span className="text-accent">✓</span>}
+              {isAskingAI ? <span className="text-accent">On</span> : null}
             </button>
 
             <div className="flex-1" />
@@ -130,10 +133,10 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
             <button
               onClick={submit}
               disabled={disabled || !value.trim()}
-              className="flex h-auto items-center justify-center rounded-lg sm:rounded-xl bg-accent px-3 py-2 text-lg text-black font-medium transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:px-5 sm:py-2.5 sm:text-xl"
+              className="flex h-auto items-center justify-center rounded-lg bg-accent px-3 py-2 text-sm font-medium text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-xl sm:px-5 sm:py-2.5"
               title={isAskingAI ? "Send question to AI" : "Send message to room"}
             >
-              {isAskingAI ? "❓" : "↑"}
+              {isAskingAI ? "Send to AI" : "Send"}
             </button>
           </div>
         </div>
@@ -141,4 +144,3 @@ export function ChatInput({ users, onSend, onTypingStart, onTypingStop, disabled
     </div>
   );
 }
-

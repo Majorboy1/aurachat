@@ -2,11 +2,19 @@
 
 Shared-room AI chat with real-time multiplayer streaming, reactions, personas, summaries, exports, and room memory.
 
+## Portfolio Summary
+
+Real-time chat app with persistent rooms and AI integration.
+
+- WebSockets for live room presence, shared messages, and streamed AI responses
+- Backend lifecycle management for room creation, room history, and fallback AI handling
+- Integration testing that verifies multi-user chat flow and AI response behavior
+
 ## Features
 
 - Real-time multiplayer AI chat rooms with shareable URLs
 - Full room history replay for users who join mid-session
-- OpenAI streaming responses broadcast live to every user in the room
+- OpenAI streaming responses broadcast live to every user in the room when someone explicitly uses Ask AI
 - Redis-backed room memory with 24-hour TTL and last-40-message context
 - Live presence sidebar with animated join and leave states
 - Shared room-wide AI persona selector
@@ -141,7 +149,7 @@ Open the app at `http://localhost:3001`.
 | --- | --- |
 | `join-room` | `{ roomId, username, color }` |
 | `leave-room` | `{ roomId }` |
-| `send-message` | `{ roomId, message, model, persona, username }` |
+| `send-message` | `{ roomId, message, model, persona, username, isAskingAI }` |
 | `add-reaction` | `{ roomId, messageId, emoji, username }` |
 | `remove-reaction` | `{ roomId, messageId, emoji, username }` |
 | `typing-start` | `{ roomId, username }` |

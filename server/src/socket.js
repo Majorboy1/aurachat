@@ -6,12 +6,12 @@ import {
   getRoomHistory,
   getRoomMeta,
   getUsersInRoom,
+  markRoomAsCreated,
   removeUserFromRoom,
   setRoomMeta,
   updateMessageReactions,
-  markRoomAsCreated,
 } from "./rooms.js";
-import { streamAIResponse, streamSummary } from "./openai.js";
+import { formatOpenAIError, streamAIResponse, streamFallbackAIResponse, streamSummary } from "./openai.js";
 
 function createUserMessage({ username, color, content, isAskingAI }) {
   return {
@@ -47,13 +47,12 @@ export function attachSocket(server, clientOrigin) {
       socket.join(roomId);
 
       const users = addUserToRoom(roomId, { username, color });
-      
-      // Mark room as created when first user joins
+
       if (users.length === 1) {
-        markRoomAsCreated(roomId);
-        console.log(`🎮 Room created: ${roomId}`);
+        await markRoomAsCreated(roomId);
+        console.log(`Room created: ${roomId}`);
       }
-      
+
       const history = await getRoomHistory(roomId);
       const meta = await getRoomMeta(roomId);
 
@@ -94,6 +93,10 @@ export function attachSocket(server, clientOrigin) {
         await appendMessageToRoom(roomId, messageObject);
         io.to(roomId).emit("new-message", messageObject);
 
+        if (!isAskingAI) {
+          return;
+        }
+
         const meta = await setRoomMeta(roomId, {
           currentModel: model || "gpt-4o",
           currentPersona: persona || "Default",
@@ -109,8 +112,23 @@ export function attachSocket(server, clientOrigin) {
         });
       } catch (error) {
         console.error("OpenAI streaming error:", error.message);
+        if (isAskingAI) {
+          try {
+            await streamFallbackAIResponse({
+              io,
+              roomId,
+              prompt: message.trim(),
+              persona: persona || "Default",
+              reason: formatOpenAIError(error),
+            });
+            return;
+          } catch (fallbackError) {
+            console.error("Fallback AI response error:", fallbackError.message);
+          }
+        }
+
         io.to(roomId).emit("server-error", {
-          message: error.message || "The AI response failed to stream.",
+          message: formatOpenAIError(error),
         });
       }
     });
@@ -154,7 +172,7 @@ export function attachSocket(server, clientOrigin) {
         });
       } catch (error) {
         console.error("Summary error:", error.message);
-        io.to(socket.id).emit("summary-error", { error: error.message || "Unable to summarize this room." });
+        io.to(socket.id).emit("summary-error", { error: formatOpenAIError(error) });
       }
     });
 
@@ -175,4 +193,3 @@ export function attachSocket(server, clientOrigin) {
 
   return io;
 }
-
